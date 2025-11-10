@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Name: Arnav Karwa
-# PRN: 1032232194
-
 # ## Implementation of KNN and NBs
 
 # In[ ]:

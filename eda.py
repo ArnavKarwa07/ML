@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Name: Arnav Karwa
-# PRN: 1032232194
-
 # ## Describe various data sources. Perform EDA. Perform Data visualization to gain insights and feature engineering
 
 # In[2]:

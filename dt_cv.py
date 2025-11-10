@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Name: Arnav Karwa
-# PRN: 1032232194
-
 # ## Tree based classifier and K-fold cross validation
 
 # Objectives:
