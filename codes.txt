@@ -1,0 +1,2347 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# ## Describe various data sources. Perform EDA. Perform Data visualization to gain insights and feature engineering
+
+# In[2]:
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+
+
+# Create your own binary class dataset with 5 features (Exploratory Variable) and atleast 30 observations. Numerical or categorical attributes in data values. CSV file.
+
+# In[3]:
+
+
+# data = {
+#     "StudentID": list(range(1, 31)),
+#     "Gender": [
+#         "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female",
+#         "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female",
+#         "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female"
+#     ],
+#     "Age": [
+#         18, 19, 20, 18, 21, 19, 22, 20, 18, 19,
+#         20, 21, 18, 19, 22, 20, 18, 19, 21, 20,
+#         18, 19, 22, 20, 21, 18, 19, 20, 18, 21
+#     ],
+#     "GPA": [
+#         3.2, 3.8, 2.9, 3.5, 2.1, 3.7, 2.5, 3.6, 3.1, 3.9,
+#         3.3, 3.4, 2.3, 3.8, 3.0, 3.9, 2.7, 3.5, 2.4, 3.2,
+#         3.1, 3.7, 2.6, 3.6, 3.4, 3.3, 2.8, 3.8, 3.0, 3.5
+#     ],
+#     "TestScore": [
+#         85, 92, 78, 88, 65, 90, 72, 89, 83, 95,
+#         87, 86, 70, 93, 82, 96, 75, 88, 68, 84,
+#         81, 91, 73, 89, 85, 87, 76, 94, 80, 90
+#     ],
+#     "ExtraCurricular": [
+#         "Yes", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "Yes", "Yes",
+#         "Yes", "No", "No", "Yes", "Yes", "Yes", "No", "Yes", "No", "Yes",
+#         "No", "Yes", "No", "Yes", "Yes", "No", "No", "Yes", "Yes", "Yes"
+#     ],
+#     "Admitted": [
+#         1, 1, 0, 1, 0, 1, 0, 1, 1, 1,
+#         1, 1, 0, 1, 1, 1, 0, 1, 0, 1,
+#         0, 1, 0, 1, 1, 1, 0, 1, 1, 1
+#     ]
+# }
+
+
+# In[4]:
+
+
+# df = pd.DataFrame(data)
+# df.to_csv("student_admission_dataset.csv", index=False)
+# print("Dataset created and saved as student_admission_dataset.csv")
+# print(f"Shape: {df.shape}")
+# print("\nFirst 5 rows:")
+# print(df.head())
+# print("\nDataset Info:")
+# print(df.info())
+# print("\nTarget Variable Distribution:")
+# print(df['Admitted'].value_counts())
+
+
+# In[5]:
+
+
+# Load dataset
+df = pd.read_csv("diabetes.csv")
+student_admission_dataset = pd.read_csv("student_admission_dataset.csv")
+
+
+# In[ ]:
+
+
+# Display dataset:
+print("\nFirst 5 rows:")
+df.head()
+
+
+# In[7]:
+
+
+# Display rows from row 4 to 12
+df.iloc[3:12]
+
+
+# In[8]:
+
+
+# Display 1st 19 records
+df.head(19)
+
+
+# In[9]:
+
+
+# Shape
+df.shape
+
+
+# In[10]:
+
+
+#Info
+df.info()
+
+
+# In[11]:
+
+
+# Describe
+df.describe()
+
+
+# Data cleaning
+
+# In[12]:
+
+
+# Identify missing values - Display the total count of null values
+missing_values = df.isnull().sum()
+missing_values
+
+
+# In[13]:
+
+
+# Display any one numeric attribute in the dataset
+df['Age'].head()
+
+
+# In[14]:
+
+
+# Handle duplicates
+df.drop_duplicates(inplace=False)
+
+
+# In[15]:
+
+
+# Replace missing values with meaningful values
+# Zero imputation	
+
+# df.fillna(0, inplace=False)  # Example of filling missing values with zero
+
+# Identify the appropriate value using the central tendency
+
+# df.fillna(df.mean(), inplace=False)  # Example of filling missing values with mean
+# df.fillna(df.median(), inplace=False)  # Example of filling missing values with median
+# df.fillna(df.mode(), inplace=False)  # Example of filling missing values with mode
+
+# Simple imputor
+imputer = SimpleImputer(strategy='mean')
+df['Age'] = imputer.fit_transform(df[['Age']])
+
+
+# In[16]:
+
+
+# Split the dataset into independent and dependent variables
+y = df['Outcome']  # Dependent variable
+X = df.drop('Outcome', axis=1)  # Independent variables
+
+X.head()
+y.head()
+
+
+# Data encoding
+
+# In[17]:
+
+
+# using student_admission_dataset
+# One-hot encoding fo gender column
+one_hot_encoder = OneHotEncoder(sparse_output=False)
+gender_encoded = one_hot_encoder.fit_transform(student_admission_dataset[["Gender"]])
+gender_encoded_df = pd.DataFrame(gender_encoded, columns=one_hot_encoder.get_feature_names_out(["Gender"]))
+student_admission_encoded = pd.concat([student_admission_dataset.drop("Gender", axis=1), gender_encoded_df], axis=1)
+student_admission_encoded
+
+# Label encoding for extra-curricular activities
+label_encoder = LabelEncoder()
+extra_encoded = one_hot_encoder.fit_transform(student_admission_dataset[["ExtraCurricular"]])
+extra_encoded_df = pd.DataFrame(extra_encoded, columns=one_hot_encoder.get_feature_names_out(["ExtraCurricular"]))
+student_admission_encoded = pd.concat([student_admission_encoded.drop("ExtraCurricular", axis=1), extra_encoded_df], axis=1)
+student_admission_encoded
+
+
+# Data Transformation
+
+# In[18]:
+
+
+# Normalization
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X.select_dtypes(include=[np.number]))
+# Convert the scaled data back to a DataFrame
+X_scaled_df = pd.DataFrame(X_scaled, columns=X.select_dtypes(include=[np.number]).columns)
+
+X_scaled_df.head()
+
+
+# EDA
+
+# In[19]:
+
+
+# Pie chart
+plt.figure(figsize=(8, 6))
+plt.pie(y.value_counts(), labels=['Yes', 'No'], autopct='%1.1f%%')
+plt.title('Distribution of Outcomes')
+plt.show()
+
+
+# **Inference:**
+# The pie chart shows the distribution of the target variable (Outcome). It helps visualize the proportion of positive and negative cases in the dataset, indicating any class imbalance.
+
+# In[20]:
+
+
+# KDE
+plt.figure(figsize=(10, 6))
+sns.kdeplot(data=df, x='Age', hue='Outcome', fill=True)
+plt.title('KDE Plot of Age by Outcome')
+plt.show()
+
+
+# **Inference:**
+# The KDE plot illustrates the distribution of 'Age' for each outcome class. It helps identify if age is a distinguishing factor between the classes.
+
+# In[21]:
+
+
+# Violin
+plt.figure(figsize=(10, 6))
+sns.violinplot(x='Outcome', y='BMI', data=df)
+plt.title('Violin Plot of Age by Outcome')
+plt.show()
+
+
+# **Inference:**
+# The violin plot shows the distribution and density of 'BMI' for each outcome class, highlighting differences in spread and central tendency.
+
+# In[22]:
+
+
+# Scatter plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=df, x='Glucose', y='BMI', hue='Outcome')
+plt.title('Scatter Plot of Glucose vs BMI by Outcome')
+plt.show()
+
+
+# **Inference:**
+# The scatter plot visualizes the relationship between 'Glucose' and 'BMI' colored by outcome, helping to spot trends or clusters that may separate the classes.
+
+# In[23]:
+
+
+# Univariate 
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Age'], bins=30)
+plt.title('Distribution of Age')
+plt.xlabel('Age')
+
+
+# **Inference:**
+# The histogram displays the distribution of 'Age' in the dataset, revealing skewness, modality, and potential outliers.
+
+# In[24]:
+
+
+# Boxplot for BMI
+plt.figure(figsize=(8, 6))
+sns.boxplot(x=df['BMI'])
+plt.title('Boxplot of BMI')
+plt.xlabel('BMI')
+plt.show()
+
+
+# **Inference:**
+# The boxplot for 'BMI' highlights the median, quartiles, and potential outliers, providing insight into the spread and central tendency of BMI values.
+
+# In[25]:
+
+
+# Correlation matrix
+plt.figure(figsize=(12, 8))
+correlation_matrix = df.corr()
+sns.heatmap(correlation_matrix, annot=True, fmt='.2f', cmap='coolwarm')
+plt.title('Correlation Matrix')
+
+
+# **Inference:**
+# The correlation matrix visualizes the relationships between all numerical features. Strong positive or negative correlations with the target variable ('Outcome') highlight which features are most influential for prediction, while high correlations between features may indicate multicollinearity.
+
+# Feature importance
+
+# In[26]:
+
+
+# Display scores of every feature with custom color
+plt.figure(figsize=(10, 6))
+feature_importance = pd.Series(correlation_matrix['Outcome'].drop('Outcome')).sort_values(ascending=False)
+feature_importance.plot(kind='bar', color='orange')
+plt.title('Feature Importance')
+plt.ylabel('Correlation with Outcome')
+plt.xlabel('Features')
+plt.show()
+
+
+# In[29]:
+
+
+# SelectKBest for feature extraction/importance
+
+from sklearn.feature_selection import SelectKBest, f_classif
+
+# Select the top k features based on univariate statistical tests
+k = 5  # Number of top features to select
+selector = SelectKBest(score_func=f_classif, k=k)
+X_new = selector.fit_transform(X, y)
+
+# Get the selected feature indices
+selected_indices = selector.get_support(indices=True)
+
+# Print the selected feature names
+print("Selected features:", X.columns[selected_indices].tolist())
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# ## Implementation of KNN and NBs
+
+# In[ ]:
+
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+# In[2]:
+
+
+# Load dataset
+df = pd.read_csv("heart.csv")
+
+
+# In[3]:
+
+
+# Encode categorical variables
+le = LabelEncoder()
+for col in ['Sex', 'ChestPainType', 'RestingECG', 'ExerciseAngina', 'ST_Slope']:
+    df[col] = le.fit_transform(df[col])
+
+
+# In[4]:
+
+
+# Split into features and target
+X = df.drop("HeartDisease", axis=1)
+y = df["HeartDisease"]
+
+
+# In[5]:
+
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+# In[6]:
+
+
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+# In[7]:
+
+
+# KNN model
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+knn_preds = knn.predict(X_test)
+
+
+# In[8]:
+
+
+# Naive Bayes model
+nb = GaussianNB()
+nb.fit(X_train, y_train)
+nb_preds = nb.predict(X_test)
+
+
+# In[9]:
+
+
+# MultinomialNB and BernoulliNB models
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+multinb = MultinomialNB()
+multinb.fit(X_train, y_train)
+multinb_preds = multinb.predict(X_test)
+
+bernoullinb = BernoulliNB()
+bernoullinb.fit(X_train, y_train)
+bernoullinb_preds = bernoullinb.predict(X_test)
+
+
+# In[10]:
+
+
+def evaluate_model(name, y_true, y_pred):
+    print(f"\n===== {name} Evaluation =====")
+    print("Accuracy:", accuracy_score(y_true, y_pred))
+    print("Precision:", precision_score(y_true, y_pred))
+    print("Recall:", recall_score(y_true, y_pred))
+    print("F1 Score:", f1_score(y_true, y_pred))
+    print("\nConfusion Matrix:")
+    cm = confusion_matrix(y_true, y_pred)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='viridis')
+    plt.title(f"{name} - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.show()
+    print("\nClassification Report:")
+    print(classification_report(y_true, y_pred))
+
+
+# In[11]:
+
+
+# Evaluate all models
+evaluate_model("KNN", y_test, knn_preds)
+evaluate_model("Naive Bayes", y_test, nb_preds)
+evaluate_model("MultinomialNB", y_test, multinb_preds)
+evaluate_model("BernoulliNB", y_test, bernoullinb_preds)
+
+
+# In[13]:
+
+
+# Comparison table and graph for all classifiers (custom metrics)
+def custom_accuracy(y_true, y_pred):
+    # Accuracy = (TP + TN) / ALL
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    tn = np.sum((y_true == 0) & (y_pred == 0))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+    return (tp + tn) / (tp + tn + fp + fn)
+
+def custom_precision(y_true, y_pred):
+    # Precision = TP / (TP + FP)
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    return tp / (tp + fp) if (tp + fp) > 0 else 0
+
+def custom_recall(y_true, y_pred):
+    # Recall = TP / (TP + FN)
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+    return tp / (tp + fn) if (tp + fn) > 0 else 0
+
+def custom_f1(y_true, y_pred):
+    # F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
+    prec = custom_precision(y_true, y_pred)
+    rec = custom_recall(y_true, y_pred)
+    return 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0
+
+models = [
+    ("KNN", knn_preds),
+    ("Naive Bayes", nb_preds),
+    ("MultinomialNB", multinb_preds),
+    ("BernoulliNB", bernoullinb_preds)
+]
+
+results = []
+for name, preds in models:
+    acc = custom_accuracy(y_test.values, preds)
+    prec = custom_precision(y_test.values, preds)
+    rec = custom_recall(y_test.values, preds)
+    f1 = custom_f1(y_test.values, preds)
+    results.append({
+        "Model": name,
+        "Accuracy": acc,
+        "Precision": prec,
+        "Recall": rec,
+        "F1 Score": f1
+    })
+
+results_df = pd.DataFrame(results)
+display(results_df)
+
+# Bar plot for comparison
+metrics = ["Accuracy", "Precision", "Recall", "F1 Score"]
+results_df.set_index("Model")[metrics].plot(kind="bar", figsize=(10,6))
+plt.title("Classifier Performance Comparison (Custom Metrics)")
+plt.ylabel("Score")
+plt.ylim(0, 1)
+plt.xticks(rotation=0)
+plt.legend(loc="lower right")
+plt.show()
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# ## Tree based classifier and K-fold cross validation
+
+# Objectives:
+# - To Study tree based classifier
+# - To implement kfold cv on given classifier
+
+# In[61]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split, KFold, cross_val_score
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+
+# In[62]:
+
+
+# Load dataset
+df = pd.read_csv("diabetes.csv")
+
+df.head()
+
+
+# In[63]:
+
+
+X = df.iloc[:, :-1]  # Features
+y = df.iloc[:, -1]   # Target
+
+
+# In[64]:
+
+
+#Train test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+# In[ ]:
+
+
+#Decision Tree Classifier
+dt_model = DecisionTreeClassifier(
+    criterion='gini',
+    max_depth=5,
+    random_state=42
+)
+dt_model.fit(X_train, y_train)
+
+
+# In[66]:
+
+
+#Predictions and Evaluation
+y_pred = dt_model.predict(X_test)
+print("Accuracy on Test Data:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+
+# In[67]:
+
+
+#confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+
+# In[68]:
+
+
+# Visualization
+plt.figure(figsize=(6,4))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['No Diabetes','Diabetes'], yticklabels=['No Diabetes','Diabetes'])
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix - Decision Tree (Diabetes Dataset)")
+plt.show()
+
+
+# In[69]:
+
+
+# Kfold cross validation
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores = cross_val_score(dt_model, X, y, cv=kf)
+print("\nScores for each fold:", cv_scores)
+print("Mean Accuracy (Cross-Validation):", cv_scores.mean())
+
+
+# In[70]:
+
+
+#Decision tree visualization
+plt.figure(figsize=(18,10))
+plot_tree(dt_model, feature_names=X.columns, class_names=['No Diabetes','Diabetes'], filled=True)
+plt.title("Decision Tree Visualization (Pima Diabetes Dataset)")
+plt.show()
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# ### Objectives
+# Implementation of SVM
+# <br>
+# Comparing performance of SVM with tree based classifier
+
+# In[38]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+
+# In[39]:
+
+
+# Load dataset
+df = pd.read_csv("diabetes.csv")
+
+df.head()
+
+
+# In[40]:
+
+
+# Simple data preparation
+# Prepare features and target
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale features for SVM
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print(f"Training set: {X_train.shape}")
+print(f"Test set: {X_test.shape}")
+print("Data prepared successfully!")
+
+
+# In[41]:
+
+
+# SVM Implementation
+print("SVM CLASSIFIERS")
+
+# Linear SVM 
+svm_linear = SVC(
+    kernel='linear',           # Linear kernel
+    C=1.0,                    # Regularization parameter (default)
+    gamma='scale',            # Kernel coefficient (default)
+    degree=3,                 # Degree for polynomial kernel (default)
+    coef0=0.0,                # Independent term in kernel function (default)
+    shrinking=True,           # Use shrinking heuristic (default)
+    probability=False,        # Probability estimates (default)
+    tol=1e-3,                 # Tolerance for stopping criterion (default)
+    cache_size=200,           # Kernel cache size in MB (default)
+    class_weight=None,        # Weights associated with classes (default)
+    verbose=False,            # Verbose output (default)
+    max_iter=-1,              # Hard limit on iterations (default)
+    decision_function_shape='ovr',  # Decision function shape (default)
+    break_ties=False,         # Break ties (default)
+    random_state=42
+)
+
+svm_linear.fit(X_train_scaled, y_train)
+linear_pred = svm_linear.predict(X_test_scaled)
+linear_accuracy = accuracy_score(y_test, linear_pred)
+
+print(f"\n1. Linear SVM Accuracy: {linear_accuracy:.4f}")
+
+# RBF SVM 
+svm_rbf = SVC(
+    kernel='rbf',
+    random_state=42
+)
+
+svm_rbf.fit(X_train_scaled, y_train)
+rbf_pred = svm_rbf.predict(X_test_scaled)
+rbf_accuracy = accuracy_score(y_test, rbf_pred)
+
+print(f"2. RBF SVM Accuracy: {rbf_accuracy:.4f}")
+
+# Store results
+svm_results = {
+    'Linear SVM': linear_accuracy,
+    'RBF SVM': rbf_accuracy
+}
+
+
+# In[42]:
+
+
+# Tree-based Classifier
+print("\nTREE-BASED CLASSIFIER")
+
+# Decision Tree
+dt_classifier = DecisionTreeClassifier(random_state=42, max_depth=10)
+dt_classifier.fit(X_train, y_train)  # No scaling needed for trees
+dt_pred = dt_classifier.predict(X_test)
+dt_accuracy = accuracy_score(y_test, dt_pred)
+
+print(f"\nDecision Tree Accuracy: {dt_accuracy:.4f}")
+
+# Store results
+tree_results = {
+    'Decision Tree': dt_accuracy
+}
+
+
+# In[43]:
+
+
+# Performance Comparison
+print("\nPERFORMANCE COMPARISON")
+
+# Calculate detailed metrics for all models
+models_data = []
+
+# Linear SVM metrics
+linear_precision = precision_score(y_test, linear_pred)
+linear_recall = recall_score(y_test, linear_pred)
+linear_f1 = f1_score(y_test, linear_pred)
+
+models_data.append({
+    'Model': 'Linear SVM',
+    'Accuracy': linear_accuracy,
+    'Precision': linear_precision,
+    'Recall': linear_recall,
+    'F1-Score': linear_f1
+})
+
+# RBF SVM metrics
+rbf_precision = precision_score(y_test, rbf_pred)
+rbf_recall = recall_score(y_test, rbf_pred)
+rbf_f1 = f1_score(y_test, rbf_pred)
+
+models_data.append({
+    'Model': 'RBF SVM',
+    'Accuracy': rbf_accuracy,
+    'Precision': rbf_precision,
+    'Recall': rbf_recall,
+    'F1-Score': rbf_f1
+})
+
+# Decision Tree metrics
+dt_precision = precision_score(y_test, dt_pred)
+dt_recall = recall_score(y_test, dt_pred)
+dt_f1 = f1_score(y_test, dt_pred)
+
+models_data.append({
+    'Model': 'Decision Tree',
+    'Accuracy': dt_accuracy,
+    'Precision': dt_precision,
+    'Recall': dt_recall,
+    'F1-Score': dt_f1
+})
+
+# Create comparison DataFrame
+comparison_df = pd.DataFrame(models_data)
+
+print("\nPerformance Metrics:")
+print(comparison_df.round(4).to_string(index=False))
+
+
+# In[44]:
+
+
+# Performance Visualization
+plt.figure(figsize=(12, 8))
+
+# Prepare data for visualization
+models = comparison_df['Model']
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+colors = ['skyblue', 'lightcoral', 'lightgreen']
+
+# Create grouped bar chart
+x = np.arange(len(metrics))
+width = 0.25
+
+for i, model in enumerate(models):
+    values = [comparison_df.iloc[i][metric] for metric in metrics]
+    plt.bar(x + i*width, values, width, label=model, color=colors[i], alpha=0.8)
+    
+    # Add value labels on bars
+    for j, v in enumerate(values):
+        plt.text(x[j] + i*width, v + 0.01, f'{v:.3f}', 
+                ha='center', va='bottom', fontsize=9)
+
+plt.xlabel('Performance Metrics')
+plt.ylabel('Score')
+plt.title('SVM vs Decision Tree Performance Comparison')
+plt.xticks(x + width, metrics)
+plt.legend()
+plt.ylim(0, 1.1)
+plt.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+
+# ## Inference
+# 
+# Based on the performance comparison between SVM classifiers and Decision Tree:
+# - **Linear SVM** achieved the highest accuracy (0.760) and precision (0.667).
+# - **Decision Tree** performed best in recall (0.709) and F1-score (0.672).
+# - **RBF SVM** had lower scores across all metrics compared to the other models.
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# Implement Random Forest
+# <br>
+# Implement Ensemble learning for any 3 classifiers
+
+# In[1]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, BaggingClassifier
+
+
+# In[2]:
+
+
+# Load dataset
+df = pd.read_csv("diabetes.csv")
+
+df.head()
+
+
+# In[3]:
+
+
+# Simple data preparation
+# Prepare features and target
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale features for SVM and Logistic Regression
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print(f"Training set: {X_train.shape}")
+print(f"Test set: {X_test.shape}")
+print("Data prepared successfully!")
+
+
+# In[4]:
+
+
+# 3 Classifiers: Random Forest, AdaBoost (boosting), Bagging (bootstrap)
+print("THREE ENSEMBLE MODELS: RandomForest, AdaBoost, Bagging")
+# 1. Random Forest (all default parameters shown)
+rf = RandomForestClassifier(
+    n_estimators=100,              # Number of trees in the forest (default)
+    criterion='gini',              # Function to measure quality of split (default)
+    max_depth=None,                # Maximum depth of the tree (default)
+    min_samples_split=2,           # Minimum samples required to split node (default)
+    min_samples_leaf=1,            # Minimum samples required at leaf node (default)
+    min_weight_fraction_leaf=0.0,  # Minimum weighted fraction at leaf (default)
+    max_features='sqrt',           # Number of features for best split (default)
+    max_leaf_nodes=None,           # Maximum leaf nodes (default)
+    min_impurity_decrease=0.0,     # Minimum impurity decrease for split (default)
+    bootstrap=True,                # Bootstrap samples when building trees (default)
+    oob_score=False,               # Use out-of-bag samples for score (default)
+    n_jobs=None,                   # Number of jobs for parallel computation (default)
+    random_state=42,               # Random seed for reproducibility
+    verbose=0,                     # Verbosity level (default)
+    warm_start=False,              # Reuse solution of previous call (default)
+    class_weight=None,             # Weights associated with classes (default)
+    ccp_alpha=0.0,                 # Complexity parameter for pruning (default)
+    max_samples=None               # Number of samples to draw (default)
+)
+rf.fit(X_train, y_train)
+rf_pred = rf.predict(X_test)
+rf_accuracy = accuracy_score(y_test, rf_pred)
+print(f"Random Forest Accuracy: {rf_accuracy:.4f}")
+
+# 2. AdaBoost (all default parameters shown)
+ada = AdaBoostClassifier(
+    estimator=None,                # The base estimator from which the boosted ensemble is built (default)
+    n_estimators=50,               # Number of weak learners (default)
+    learning_rate=1.0,             # Weight applied to each classifier at each boosting iteration (default)
+    algorithm='SAMME',             # If ‘SAMME’ then use the SAMME real boosting algorithm (default)
+    random_state=42                # Random seed for reproducibility
+)
+ada.fit(X_train, y_train)
+ada_pred = ada.predict(X_test)
+ada_accuracy = accuracy_score(y_test, ada_pred)
+print(f"AdaBoost Accuracy: {ada_accuracy:.4f}")
+
+# 3. BaggingClassifier (all default parameters shown)
+bag = BaggingClassifier(
+    estimator=None,                # The base estimator to fit on random subsets of the dataset (default)
+    n_estimators=10,               # Number of base estimators (default)
+    max_samples=1.0,               # Max samples to draw from X to train each base estimator (default)
+    max_features=1.0,              # Max features to draw from X to train each base estimator (default)
+    bootstrap=True,                # Whether samples are drawn with replacement (default)
+    bootstrap_features=False,      # Whether features are drawn with replacement (default)
+    oob_score=False,               # Whether to use out-of-bag samples to estimate the generalization error (default)
+    warm_start=False,              # Whether to reuse the solution of the previous call to fit (default)
+    n_jobs=None,                   # Number of jobs to run in parallel (default)
+    random_state=42,               # Random seed for reproducibility
+    verbose=0                      # Controls the verbosity when fitting and predicting (default)
+)
+bag.fit(X_train, y_train)
+bag_pred = bag.predict(X_test)
+bag_accuracy = accuracy_score(y_test, bag_pred)
+print(f"Bagging (Bootstrap) Accuracy: {bag_accuracy:.4f}")
+
+
+# In[5]:
+
+
+# Performance Comparison
+print("\nPERFORMANCE COMPARISON")
+
+models_data = []
+
+# Random Forest metrics
+rf_precision = precision_score(y_test, rf_pred)
+rf_recall = recall_score(y_test, rf_pred)
+rf_f1 = f1_score(y_test, rf_pred)
+models_data.append({
+    'Model': 'Random Forest',
+    'Accuracy': rf_accuracy,
+    'Precision': rf_precision,
+    'Recall': rf_recall,
+    'F1-Score': rf_f1
+})
+
+# AdaBoost metrics
+ada_precision = precision_score(y_test, ada_pred)
+ada_recall = recall_score(y_test, ada_pred)
+ada_f1 = f1_score(y_test, ada_pred)
+models_data.append({
+    'Model': 'AdaBoost',
+    'Accuracy': ada_accuracy,
+    'Precision': ada_precision,
+    'Recall': ada_recall,
+    'F1-Score': ada_f1
+})
+
+# Bagging metrics
+bag_precision = precision_score(y_test, bag_pred)
+bag_recall = recall_score(y_test, bag_pred)
+bag_f1 = f1_score(y_test, bag_pred)
+models_data.append({
+    'Model': 'Bagging (Bootstrap)',
+    'Accuracy': bag_accuracy,
+    'Precision': bag_precision,
+    'Recall': bag_recall,
+    'F1-Score': bag_f1
+})
+
+# Create comparison DataFrame
+comparison_df = pd.DataFrame(models_data)
+
+print("\nPerformance Metrics:")
+print(comparison_df.round(4).to_string(index=False))
+
+
+# In[6]:
+
+
+# Performance Visualization
+plt.figure(figsize=(12, 8))
+
+models = comparison_df['Model']
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+colors = ['skyblue', 'lightcoral', 'lightgreen']
+
+x = np.arange(len(metrics))
+width = 0.25
+
+for i, model in enumerate(models):
+    values = [comparison_df.iloc[i][metric] for metric in metrics]
+    plt.bar(x + i*width, values, width, label=model, color=colors[i], alpha=0.8)
+    for j, v in enumerate(values):
+        plt.text(x[j] + i*width, v + 0.01, f'{v:.3f}', ha='center', va='bottom', fontsize=10)
+
+plt.xlabel('Performance Metrics')
+plt.ylabel('Score')
+plt.title('Random Forest vs AdaBoost vs Bagging (Bootstrap) Performance Comparison')
+plt.xticks(x + width, metrics)
+plt.legend()
+plt.ylim(0, 1.1)
+plt.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+
+# ## Inference
+# 
+# After evaluating Random Forest, AdaBoost, and Bagging (bootstrap) on the diabetes dataset:
+# 
+# - Random Forest provides robust predictions by averaging many decision trees and typically reduces variance.
+# - AdaBoost (boosting) focuses on hard examples and often improves recall and F1 by combining weak learners.
+# - Bagging (bootstrap) reduces variance by training base estimators on bootstrap samples and aggregating their predictions.
+# 
+# Boosting is by far the best model for this dataset
+
+# # ROC–AUC Curve
+# This section plots the ROC curves for the three ensemble models (Random Forest, AdaBoost, Bagging) and reports their AUC scores.
+
+# In[7]:
+
+
+# ROC curves and AUC for the three ensemble models
+from sklearn.metrics import roc_curve, roc_auc_score
+import matplotlib.pyplot as plt
+
+# Get positive-class probabilities (fallback to decision_function if needed)
+def get_scores(model, X):
+    if hasattr(model, "predict_proba"):
+        return model.predict_proba(X)[:, 1]
+    elif hasattr(model, "decision_function"):
+        return model.decision_function(X)
+    else:
+        # As a very last resort, use predictions (not ideal for ROC)
+        return model.predict(X)
+
+rf_scores = get_scores(rf, X_test)
+ada_scores = get_scores(ada, X_test)
+bag_scores = get_scores(bag, X_test)
+
+rf_fpr, rf_tpr, _ = roc_curve(y_test, rf_scores)
+ada_fpr, ada_tpr, _ = roc_curve(y_test, ada_scores)
+bag_fpr, bag_tpr, _ = roc_curve(y_test, bag_scores)
+
+rf_auc = roc_auc_score(y_test, rf_scores)
+ada_auc = roc_auc_score(y_test, ada_scores)
+bag_auc = roc_auc_score(y_test, bag_scores)
+
+plt.figure(figsize=(8, 6))
+plt.plot(rf_fpr, rf_tpr, label=f"Random Forest (AUC = {rf_auc:.3f})", linewidth=2)
+plt.plot(ada_fpr, ada_tpr, label=f"AdaBoost (AUC = {ada_auc:.3f})", linewidth=2)
+plt.plot(bag_fpr, bag_tpr, label=f"Bagging (AUC = {bag_auc:.3f})", linewidth=2)
+plt.plot([0, 1], [0, 1], 'k--', label="Chance", alpha=0.6)
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curves with AUC: RandomForest vs AdaBoost vs Bagging")
+plt.legend(loc="lower right")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# Optional: print a compact table of AUCs
+import pandas as pd
+auc_df = pd.DataFrame([
+    {"Model": "Random Forest", "AUC": rf_auc},
+    {"Model": "AdaBoost", "AUC": ada_auc},
+    {"Model": "Bagging (Bootstrap)", "AUC": bag_auc},
+])
+print("\nAUC Scores:")
+print(auc_df.round(4).to_string(index=False))
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[39]:
+
+
+# Import necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans, DBSCAN, SpectralClustering
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score, adjusted_rand_score, calinski_harabasz_score
+from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics.pairwise import pairwise_distances
+from kmedoids import KMedoids
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set plot style
+plt.style.use('seaborn-v0_8')
+sns.set_palette("husl")
+
+
+# In[40]:
+
+
+# Load the diabetes dataset
+data = pd.read_csv('diabetes.csv')
+
+print("Dataset Information:")
+print(f"Shape: {data.shape}")
+print(f"Columns: {list(data.columns)}")
+print("\nFirst few rows:")
+print(data.head())
+
+print("\nDataset Statistics:")
+print(data.describe())
+
+print("\nMissing values:")
+print(data.isnull().sum())
+
+# Essential preprocessing for clustering
+# Remove the target variable for clustering (unsupervised learning)
+X = data.drop('Outcome', axis=1)
+y_true = data['Outcome']  # Keep for evaluation purposes
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print(f"\nFeatures for clustering: {X.columns.tolist()}")
+print(f"Scaled data shape: {X_scaled.shape}")
+
+
+# In[41]:
+
+
+# 1. K-MEANS CLUSTERING
+print("="*50)
+print("1. K-MEANS CLUSTERING")
+print("="*50)
+
+# Find optimal number of clusters using elbow method
+inertias = []
+silhouette_scores = []
+k_range = range(2, 11)
+
+for k in k_range:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    inertias.append(kmeans.inertia_)
+    silhouette_scores.append(silhouette_score(X_scaled, kmeans.labels_))
+
+# Plot elbow curve and silhouette scores
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+ax1.plot(k_range, inertias, 'bo-')
+ax1.set_xlabel('Number of Clusters (k)')
+ax1.set_ylabel('Inertia')
+ax1.set_title('Elbow Method for Optimal k')
+ax1.grid(True)
+
+ax2.plot(k_range, silhouette_scores, 'ro-')
+ax2.set_xlabel('Number of Clusters (k)')
+ax2.set_ylabel('Silhouette Score')
+ax2.set_title('Silhouette Score vs Number of Clusters')
+ax2.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+# Choose optimal k (let's use k=3 based on the elbow method)
+optimal_k = 3
+print(f"\nUsing k = {optimal_k} for K-Means clustering")
+
+# Apply K-Means with optimal k
+kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)
+kmeans_labels = kmeans.fit_predict(X_scaled)
+
+# Calculate metrics
+kmeans_silhouette = silhouette_score(X_scaled, kmeans_labels)
+kmeans_ari = adjusted_rand_score(y_true, kmeans_labels)
+kmeans_calinski = calinski_harabasz_score(X_scaled, kmeans_labels)
+
+print(f"\nK-Means Results:")
+print(f"Silhouette Score: {kmeans_silhouette:.4f}")
+print(f"Adjusted Rand Index: {kmeans_ari:.4f}")
+print(f"Calinski-Harabasz Score: {kmeans_calinski:.4f}")
+
+# Count points in each cluster using pandas
+cluster_counts = pd.Series(kmeans_labels).value_counts().sort_index().values
+print(f"Number of points in each cluster: {cluster_counts}")
+
+
+# In[42]:
+
+
+# 2. K-MEDOIDS CLUSTERING
+print("="*50)
+print("2. K-MEDOIDS CLUSTERING")
+print("="*50)
+
+# Apply K-Medoids with the same optimal k using the kmedoids library
+# The kmedoids library expects distance matrix, so let's compute it first
+from sklearn.metrics.pairwise import pairwise_distances
+
+# Calculate distance matrix
+distance_matrix = pairwise_distances(X_scaled, metric='euclidean')
+
+# Apply K-Medoids using fasterpam method which is more stable
+kmedoids = KMedoids(n_clusters=optimal_k, method='fasterpam', random_state=42)
+kmedoids_labels = kmedoids.fit_predict(distance_matrix)
+
+# Calculate metrics
+kmedoids_silhouette = silhouette_score(X_scaled, kmedoids_labels)
+kmedoids_ari = adjusted_rand_score(y_true, kmedoids_labels)
+kmedoids_calinski = calinski_harabasz_score(X_scaled, kmedoids_labels)
+
+print(f"\nK-Medoids Results:")
+print(f"Silhouette Score: {kmedoids_silhouette:.4f}")
+print(f"Adjusted Rand Index: {kmedoids_ari:.4f}")
+print(f"Calinski-Harabasz Score: {kmedoids_calinski:.4f}")
+
+# Count points in each cluster
+cluster_counts = pd.Series(kmedoids_labels).value_counts().sort_index().values
+print(f"Number of points in each cluster: {cluster_counts}")
+
+# Get medoid indices
+medoid_indices = kmedoids.medoid_indices_
+print(f"\nMedoid indices: {medoid_indices}")
+print("Medoid values:")
+for i, idx in enumerate(medoid_indices):
+    print(f"Cluster {i}: Sample {idx}")
+    print(f"  Original values: {X.iloc[idx].values}")
+    print(f"  Scaled values: {X_scaled[idx]}")
+    print()
+
+
+# In[43]:
+
+
+# 3. DBSCAN CLUSTERING
+print("="*50)
+print("3. DBSCAN CLUSTERING")
+print("="*50)
+
+# Find optimal parameters for DBSCAN
+# Calculate k-distance graph to find optimal eps
+k = 4  # minPts = k + 1 = 5
+nbrs = NearestNeighbors(n_neighbors=k).fit(X_scaled)
+distances, indices = nbrs.kneighbors(X_scaled)
+
+# Sort the distances for the k-th nearest neighbor
+k_distances = distances[:, k-1]
+k_distances_sorted = sorted(k_distances)
+
+# Plot k-distance graph
+plt.figure(figsize=(10, 6))
+plt.plot(range(len(k_distances_sorted)), k_distances_sorted)
+plt.xlabel('Points sorted by distance')
+plt.ylabel(f'{k}-NN Distance')
+plt.title('K-Distance Graph for DBSCAN Parameter Selection')
+plt.grid(True)
+plt.show()
+
+# Try different eps values
+eps_values = [0.5, 0.7, 0.9, 1.1, 1.3, 1.5]
+min_samples_values = [3, 5, 7, 10]
+
+best_silhouette = -1
+best_params = {}
+
+print("Testing different DBSCAN parameters:")
+for eps in eps_values:
+    for min_samples in min_samples_values:
+        dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+        dbscan_labels = dbscan.fit_predict(X_scaled)
+        
+        # Skip if all points are noise or all points in one cluster
+        unique_labels = set(dbscan_labels)
+        n_clusters = len(unique_labels) - (1 if -1 in unique_labels else 0)
+        if n_clusters > 1:
+            silhouette = silhouette_score(X_scaled, dbscan_labels)
+            n_noise = list(dbscan_labels).count(-1)
+            print(f"eps={eps}, min_samples={min_samples}: "
+                  f"{n_clusters} clusters, {n_noise} noise points, "
+                  f"silhouette={silhouette:.4f}")
+            
+            if silhouette > best_silhouette:
+                best_silhouette = silhouette
+                best_params = {'eps': eps, 'min_samples': min_samples}
+
+print(f"\nBest parameters: {best_params}")
+
+# Apply DBSCAN with best parameters
+dbscan = DBSCAN(eps=best_params['eps'], min_samples=best_params['min_samples'])
+dbscan_labels = dbscan.fit_predict(X_scaled)
+
+# Calculate metrics
+unique_labels = set(dbscan_labels)
+n_clusters_dbscan = len(unique_labels) - (1 if -1 in unique_labels else 0)
+n_noise = list(dbscan_labels).count(-1)
+
+if n_clusters_dbscan > 1:
+    dbscan_silhouette = silhouette_score(X_scaled, dbscan_labels)
+    dbscan_ari = adjusted_rand_score(y_true, dbscan_labels)
+    dbscan_calinski = calinski_harabasz_score(X_scaled, dbscan_labels)
+else:
+    dbscan_silhouette = -1
+    dbscan_ari = -1
+    dbscan_calinski = -1
+
+print(f"\nDBSCAN Results:")
+print(f"Number of clusters: {n_clusters_dbscan}")
+print(f"Number of noise points: {n_noise}")
+print(f"Silhouette Score: {dbscan_silhouette:.4f}")
+print(f"Adjusted Rand Index: {dbscan_ari:.4f}")
+print(f"Calinski-Harabasz Score: {dbscan_calinski:.4f}")
+
+if n_clusters_dbscan > 0:
+    # Count non-noise points in each cluster
+    non_noise_labels = [label for label in dbscan_labels if label >= 0]
+    cluster_counts = pd.Series(non_noise_labels).value_counts().sort_index().values
+    print(f"Number of points in each cluster: {cluster_counts}")
+
+
+# In[44]:
+
+
+# 4. SPECTRAL CLUSTERING
+print("="*50)
+print("4. SPECTRAL CLUSTERING")
+print("="*50)
+
+# Apply Spectral Clustering with different parameters
+print("Testing different Spectral Clustering parameters:")
+
+# Test different affinity functions and number of clusters
+affinities = ['nearest_neighbors', 'rbf']
+gamma_values = [0.1, 1.0, 10.0]
+n_neighbors_values = [5, 10, 15]
+
+spectral_results = []
+
+for affinity in affinities:
+    if affinity == 'rbf':
+        for gamma in gamma_values:
+            try:
+                spectral = SpectralClustering(
+                    n_clusters=optimal_k, 
+                    affinity=affinity, 
+                    gamma=gamma,
+                    random_state=42
+                )
+                spectral_labels = spectral.fit_predict(X_scaled)
+                
+                silhouette = silhouette_score(X_scaled, spectral_labels)
+                ari = adjusted_rand_score(y_true, spectral_labels)
+                calinski = calinski_harabasz_score(X_scaled, spectral_labels)
+                
+                spectral_results.append({
+                    'affinity': affinity,
+                    'gamma': gamma,
+                    'n_neighbors': None,
+                    'silhouette': silhouette,
+                    'ari': ari,
+                    'calinski': calinski,
+                    'labels': spectral_labels
+                })
+                
+                print(f"Affinity: {affinity}, gamma: {gamma}, "
+                      f"Silhouette: {silhouette:.4f}, ARI: {ari:.4f}")
+                      
+            except Exception as e:
+                print(f"Error with affinity={affinity}, gamma={gamma}: {e}")
+                
+    else:  # nearest_neighbors
+        for n_neighbors in n_neighbors_values:
+            try:
+                spectral = SpectralClustering(
+                    n_clusters=optimal_k, 
+                    affinity=affinity, 
+                    n_neighbors=n_neighbors,
+                    random_state=42
+                )
+                spectral_labels = spectral.fit_predict(X_scaled)
+                
+                silhouette = silhouette_score(X_scaled, spectral_labels)
+                ari = adjusted_rand_score(y_true, spectral_labels)
+                calinski = calinski_harabasz_score(X_scaled, spectral_labels)
+                
+                spectral_results.append({
+                    'affinity': affinity,
+                    'gamma': None,
+                    'n_neighbors': n_neighbors,
+                    'silhouette': silhouette,
+                    'ari': ari,
+                    'calinski': calinski,
+                    'labels': spectral_labels
+                })
+                
+                print(f"Affinity: {affinity}, n_neighbors: {n_neighbors}, "
+                      f"Silhouette: {silhouette:.4f}, ARI: {ari:.4f}")
+                      
+            except Exception as e:
+                print(f"Error with affinity={affinity}, n_neighbors={n_neighbors}: {e}")
+
+# Find best spectral clustering result
+best_spectral = max(spectral_results, key=lambda x: x['silhouette'])
+
+print(f"\nBest Spectral Clustering Configuration:")
+print(f"Affinity: {best_spectral['affinity']}")
+if best_spectral['gamma'] is not None:
+    print(f"Gamma: {best_spectral['gamma']}")
+if best_spectral['n_neighbors'] is not None:
+    print(f"N_neighbors: {best_spectral['n_neighbors']}")
+
+spectral_labels = best_spectral['labels']
+spectral_silhouette = best_spectral['silhouette']
+spectral_ari = best_spectral['ari']
+spectral_calinski = best_spectral['calinski']
+
+print(f"\nSpectral Clustering Results:")
+print(f"Silhouette Score: {spectral_silhouette:.4f}")
+print(f"Adjusted Rand Index: {spectral_ari:.4f}")
+print(f"Calinski-Harabasz Score: {spectral_calinski:.4f}")
+
+# Count points in each cluster using pandas
+cluster_counts = pd.Series(spectral_labels).value_counts().sort_index().values
+print(f"Number of points in each cluster: {cluster_counts}")
+
+
+# In[45]:
+
+
+# 5. COMPARISON OF ALL CLUSTERING METHODS
+print("="*50)
+print("5. COMPARISON OF ALL CLUSTERING METHODS")
+print("="*50)
+
+# Apply PCA for visualization (reduce to 2D)
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+print(f"PCA for visualization - Explained variance: {sum(pca.explained_variance_ratio_):.3f}")
+
+# Create a comparison table
+comparison_data = {
+    'Algorithm': ['K-Means', 'K-Medoids', 'DBSCAN', 'Spectral'],
+    'Silhouette Score': [kmeans_silhouette, kmedoids_silhouette, dbscan_silhouette, spectral_silhouette],
+    'Adjusted Rand Index': [kmeans_ari, kmedoids_ari, dbscan_ari, spectral_ari],
+    'Calinski-Harabasz Score': [kmeans_calinski, kmedoids_calinski, dbscan_calinski, spectral_calinski],
+    'Number of Clusters': [optimal_k, optimal_k, n_clusters_dbscan, optimal_k]
+}
+
+comparison_df = pd.DataFrame(comparison_data)
+print("\nClustering Algorithm Comparison:")
+print(comparison_df.round(4))
+
+# Visualize all clustering results
+fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+
+# Original data with true labels
+axes[0, 0].scatter(X_pca[:, 0], X_pca[:, 1], c=y_true, cmap='viridis', alpha=0.7)
+axes[0, 0].set_title('Original Data\n(True Labels)')
+axes[0, 0].set_xlabel('PC1')
+axes[0, 0].set_ylabel('PC2')
+
+# K-Means results
+axes[0, 1].scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans_labels, cmap='tab10', alpha=0.7)
+axes[0, 1].set_title(f'K-Means\n(Silhouette: {kmeans_silhouette:.3f})')
+axes[0, 1].set_xlabel('PC1')
+axes[0, 1].set_ylabel('PC2')
+
+# K-Medoids results
+axes[0, 2].scatter(X_pca[:, 0], X_pca[:, 1], c=kmedoids_labels, cmap='tab10', alpha=0.7)
+axes[0, 2].set_title(f'K-Medoids\n(Silhouette: {kmedoids_silhouette:.3f})')
+axes[0, 2].set_xlabel('PC1')
+axes[0, 2].set_ylabel('PC2')
+
+# DBSCAN results
+axes[1, 0].scatter(X_pca[:, 0], X_pca[:, 1], c=dbscan_labels, cmap='tab10', alpha=0.7)
+axes[1, 0].set_title(f'DBSCAN\n(Silhouette: {dbscan_silhouette:.3f})')
+axes[1, 0].set_xlabel('PC1')
+axes[1, 0].set_ylabel('PC2')
+
+# Spectral results
+axes[1, 1].scatter(X_pca[:, 0], X_pca[:, 1], c=spectral_labels, cmap='tab10', alpha=0.7)
+axes[1, 1].set_title(f'Spectral\n(Silhouette: {spectral_silhouette:.3f})')
+axes[1, 1].set_xlabel('PC1')
+axes[1, 1].set_ylabel('PC2')
+
+# Metrics comparison bar plot
+algorithms = ['K-Means', 'K-Medoids', 'DBSCAN', 'Spectral']
+silhouette_scores = [kmeans_silhouette, kmedoids_silhouette, dbscan_silhouette, spectral_silhouette]
+ari_scores = [kmeans_ari, kmedoids_ari, dbscan_ari, spectral_ari]
+
+# Create bar positions using range instead of numpy
+x_positions = list(range(len(algorithms)))
+width = 0.35
+
+# Adjust positions for bar placement
+x_pos_left = [x - width/2 for x in x_positions]
+x_pos_right = [x + width/2 for x in x_positions]
+
+axes[1, 2].bar(x_pos_left, silhouette_scores, width, label='Silhouette Score', alpha=0.8)
+axes[1, 2].bar(x_pos_right, ari_scores, width, label='Adjusted Rand Index', alpha=0.8)
+axes[1, 2].set_xlabel('Algorithms')
+axes[1, 2].set_ylabel('Score')
+axes[1, 2].set_title('Performance Metrics Comparison')
+axes[1, 2].set_xticks(x_positions)
+axes[1, 2].set_xticklabels(algorithms, rotation=45)
+axes[1, 2].legend()
+axes[1, 2].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
+
+# In[46]:
+
+
+# 6. DETAILED ANALYSIS AND INSIGHTS
+print("="*50)
+print("6. DETAILED ANALYSIS AND INSIGHTS")
+print("="*50)
+
+# Analyze cluster characteristics for each method using pandas operations
+print("\nK-MEANS Cluster Analysis:")
+print("-" * 40)
+kmeans_df = X.copy()
+kmeans_df['cluster'] = kmeans_labels
+for cluster_id in sorted(set(kmeans_labels)):
+    cluster_data = kmeans_df[kmeans_df['cluster'] == cluster_id]
+    cluster_size = len(cluster_data)
+    print(f"\nCluster {cluster_id}:")
+    print(f"  Size: {cluster_size} points ({cluster_size/len(X)*100:.1f}%)")
+    print(f"  Feature means:")
+    for feature in X.columns:
+        mean_val = cluster_data[feature].mean()
+        overall_mean = X[feature].mean()
+        print(f"    {feature}: {mean_val:.2f} (overall: {overall_mean:.2f})")
+
+print("\nK-MEDOIDS Cluster Analysis:")
+print("-" * 40)
+kmedoids_df = X.copy()
+kmedoids_df['cluster'] = kmedoids_labels
+for cluster_id in sorted(set(kmedoids_labels)):
+    cluster_data = kmedoids_df[kmedoids_df['cluster'] == cluster_id]
+    cluster_size = len(cluster_data)
+    print(f"\nCluster {cluster_id}:")
+    print(f"  Size: {cluster_size} points ({cluster_size/len(X)*100:.1f}%)")
+    print(f"  Feature means:")
+    for feature in X.columns:
+        mean_val = cluster_data[feature].mean()
+        overall_mean = X[feature].mean()
+        print(f"    {feature}: {mean_val:.2f} (overall: {overall_mean:.2f})")
+
+if n_clusters_dbscan > 0:
+    print("\nDBSCAN Cluster Analysis:")
+    print("-" * 40)
+    dbscan_df = X.copy()
+    dbscan_df['cluster'] = dbscan_labels
+    for cluster_id in sorted(set(dbscan_labels)):
+        if cluster_id != -1:  # Skip noise points
+            cluster_data = dbscan_df[dbscan_df['cluster'] == cluster_id]
+            cluster_size = len(cluster_data)
+            print(f"\nCluster {cluster_id}:")
+            print(f"  Size: {cluster_size} points ({cluster_size/len(X)*100:.1f}%)")
+            print(f"  Feature means:")
+            for feature in X.columns:
+                mean_val = cluster_data[feature].mean()
+                overall_mean = X[feature].mean()
+                print(f"    {feature}: {mean_val:.2f} (overall: {overall_mean:.2f})")
+
+print("\nSPECTRAL Cluster Analysis:")
+print("-" * 40)
+spectral_df = X.copy()
+spectral_df['cluster'] = spectral_labels
+for cluster_id in sorted(set(spectral_labels)):
+    cluster_data = spectral_df[spectral_df['cluster'] == cluster_id]
+    cluster_size = len(cluster_data)
+    print(f"\nCluster {cluster_id}:")
+    print(f"  Size: {cluster_size} points ({cluster_size/len(X)*100:.1f}%)")
+    print(f"  Feature means:")
+    for feature in X.columns:
+        mean_val = cluster_data[feature].mean()
+        overall_mean = X[feature].mean()
+        print(f"    {feature}: {mean_val:.2f} (overall: {overall_mean:.2f})")
+
+# Statistical significance test between clustering methods
+print("\n" + "="*50)
+print("CLUSTERING METHOD COMPARISON SUMMARY")
+print("="*50)
+
+# Find the best performing method for each metric
+best_silhouette = comparison_df.loc[comparison_df['Silhouette Score'].idxmax()]
+best_ari = comparison_df.loc[comparison_df['Adjusted Rand Index'].idxmax()]
+best_calinski = comparison_df.loc[comparison_df['Calinski-Harabasz Score'].idxmax()]
+
+print(f"\nBest Performing Methods by Metric:")
+print(f"Best Silhouette Score: {best_silhouette['Algorithm']} ({best_silhouette['Silhouette Score']:.4f})")
+print(f"Best Adjusted Rand Index: {best_ari['Algorithm']} ({best_ari['Adjusted Rand Index']:.4f})")
+print(f"Best Calinski-Harabasz Score: {best_calinski['Algorithm']} ({best_calinski['Calinski-Harabasz Score']:.4f})")
+
+# Overall ranking
+print(f"\nOverall Algorithm Ranking (by average normalized scores):")
+# Normalize scores to 0-1 range for fair comparison
+normalized_scores = comparison_df.copy()
+for col in ['Silhouette Score', 'Adjusted Rand Index', 'Calinski-Harabasz Score']:
+    min_val = normalized_scores[col].min()
+    max_val = normalized_scores[col].max()
+    if max_val != min_val:
+        normalized_scores[f'{col}_norm'] = (normalized_scores[col] - min_val) / (max_val - min_val)
+    else:
+        normalized_scores[f'{col}_norm'] = 1.0
+
+normalized_scores['Average_Score'] = (
+    normalized_scores['Silhouette Score_norm'] + 
+    normalized_scores['Adjusted Rand Index_norm'] + 
+    normalized_scores['Calinski-Harabasz Score_norm']
+) / 3
+
+ranking = normalized_scores.sort_values('Average_Score', ascending=False)
+for i, (idx, row) in enumerate(ranking.iterrows(), 1):
+    print(f"{i}. {row['Algorithm']}: {row['Average_Score']:.4f}")
+
+print(f"\nKey Insights:")
+print("• K-Means and K-Medoids show similar performance patterns")
+print("• DBSCAN is effective at identifying outliers but may struggle with varying densities")
+print("• Spectral clustering performs well when data has non-linear cluster boundaries")
+print("• The choice of algorithm depends on the specific characteristics of your data")
+print("• Consider data size, cluster shape, and noise tolerance when selecting a method")
+
+
+# In[47]:
+
+
+# 7. ADDITIONAL VISUALIZATIONS AND VALIDATION
+print("="*50)
+print("7. ADDITIONAL VISUALIZATIONS AND VALIDATION")
+print("="*50)
+
+# Create correlation heatmap of features
+plt.figure(figsize=(12, 8))
+correlation_matrix = X.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0, 
+            square=True, fmt='.2f')
+plt.title('Feature Correlation Matrix')
+plt.tight_layout()
+plt.show()
+
+# Feature importance for clustering (using cluster centers from K-means)
+plt.figure(figsize=(15, 10))
+
+# K-means cluster centers
+kmeans_centers = scaler.inverse_transform(kmeans.cluster_centers_)
+center_df = pd.DataFrame(kmeans_centers, columns=X.columns)
+
+# Plot cluster centers
+plt.subplot(2, 2, 1)
+for i in range(len(center_df)):
+    plt.plot(range(len(X.columns)), center_df.iloc[i], 'o-', 
+             label=f'Cluster {i}', linewidth=2, markersize=8)
+plt.xticks(range(len(X.columns)), X.columns, rotation=45)
+plt.ylabel('Feature Value')
+plt.title('K-Means Cluster Centers')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+# Silhouette analysis for K-means
+from sklearn.metrics import silhouette_samples
+plt.subplot(2, 2, 2)
+silhouette_vals = silhouette_samples(X_scaled, kmeans_labels)
+y_lower = 10
+for i in range(optimal_k):
+    cluster_silhouette_vals = silhouette_vals[pd.Series(kmeans_labels) == i]
+    cluster_silhouette_vals = sorted(cluster_silhouette_vals)
+    
+    size_cluster_i = len(cluster_silhouette_vals)
+    y_upper = y_lower + size_cluster_i
+    
+    color = plt.cm.tab10(i)
+    y_range = list(range(y_lower, y_upper))
+    plt.fill_betweenx(y_range, 0, cluster_silhouette_vals,
+                      facecolor=color, edgecolor=color, alpha=0.7)
+    
+    plt.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+    y_lower = y_upper + 10
+
+plt.axvline(x=kmeans_silhouette, color="red", linestyle="--", 
+            label=f'Average Score: {kmeans_silhouette:.3f}')
+plt.xlabel('Silhouette Coefficient Values')
+plt.ylabel('Cluster Label')
+plt.title('Silhouette Analysis for K-Means')
+plt.legend()
+
+# Distribution of cluster sizes
+plt.subplot(2, 2, 3)
+methods = ['K-Means', 'K-Medoids', 'DBSCAN', 'Spectral']
+cluster_labels_list = [kmeans_labels, kmedoids_labels, dbscan_labels, spectral_labels]
+
+cluster_size_data = []
+for method, labels in zip(methods, cluster_labels_list):
+    unique_labels = set(labels)
+    if -1 in unique_labels:  # Remove noise points for DBSCAN
+        unique_labels = unique_labels - {-1}
+    
+    for i, label in enumerate(sorted(unique_labels)):
+        size = list(labels).count(label)
+        cluster_size_data.append((method, f'Cluster {i}', size))
+
+cluster_df = pd.DataFrame(cluster_size_data, columns=['Method', 'Cluster', 'Size'])
+sns.barplot(data=cluster_df, x='Method', y='Size', hue='Cluster')
+plt.title('Cluster Size Distribution by Method')
+plt.xticks(rotation=45)
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+
+# Inertia comparison for different algorithms
+plt.subplot(2, 2, 4)
+inertia_values = []
+labels_list = [kmeans_labels, kmedoids_labels, spectral_labels]
+method_names = ['K-Means', 'K-Medoids', 'Spectral']
+
+for labels, name in zip(labels_list, method_names):
+    # Calculate within-cluster sum of squares using pandas
+    wcss = 0
+    labels_series = pd.Series(labels)
+    unique_labels = labels_series.unique()
+    for label in unique_labels:
+        cluster_mask = labels_series == label
+        cluster_points = X_scaled[cluster_mask]
+        if len(cluster_points) > 0:
+            centroid = cluster_points.mean(axis=0)
+            wcss += ((cluster_points - centroid) ** 2).sum().sum()
+    inertia_values.append(wcss)
+
+# Add DBSCAN (calculate differently due to noise points)
+if n_clusters_dbscan > 0:
+    wcss_dbscan = 0
+    dbscan_series = pd.Series(dbscan_labels)
+    unique_labels = dbscan_series.unique()
+    for label in unique_labels:
+        if label != -1:  # Skip noise points
+            cluster_mask = dbscan_series == label
+            cluster_points = X_scaled[cluster_mask]
+            if len(cluster_points) > 0:
+                centroid = cluster_points.mean(axis=0)
+                wcss_dbscan += ((cluster_points - centroid) ** 2).sum().sum()
+    inertia_values.append(wcss_dbscan)
+    method_names.append('DBSCAN')
+
+colors = ['skyblue', 'lightcoral', 'lightgreen', 'gold'][:len(method_names)]
+plt.bar(method_names, inertia_values, color=colors)
+plt.ylabel('Within-Cluster Sum of Squares')
+plt.title('Inertia Comparison')
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()
+
+print("Visualization Complete!")
+print("The notebook now contains a comprehensive comparison of:")
+print("• K-Means Clustering")
+print("• K-Medoids Clustering (using kmedoids library)") 
+print("• DBSCAN Clustering")
+print("• Spectral Clustering")
+print("• Performance metrics and comparisons")
+print("• Visual analysis and insights")
+print("\nAll implementations use sklearn built-in functions and proper K-medoids from kmedoids library.")
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans, DBSCAN, SpectralClustering
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from sklearn_extra.cluster import KMedoids
+import warnings
+warnings.filterwarnings('ignore')
+
+
+# In[2]:
+
+
+# Load the diabetes dataset
+df = pd.read_csv('datasets/diabetes.csv')
+
+print("Dataset Shape:", df.shape)
+print("\nFirst 5 rows:")
+print(df.head())
+
+# Prepare data for clustering
+# Remove the target column (Outcome) since clustering is unsupervised
+X = df.drop('Outcome', axis=1)
+y_true = df['Outcome']  # Keep for comparison
+
+# Standardize the features (important for distance-based algorithms)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print(f"\nNumber of samples: {X.shape[0]}")
+print(f"Number of features: {X.shape[1]}")
+
+
+# In[3]:
+
+
+# 1. K-MEANS CLUSTERING
+print("=" * 50)
+print("1. K-MEANS CLUSTERING")
+print("=" * 50)
+
+# Find optimal number of clusters using Elbow Method
+inertias = []
+k_range = range(2, 11)
+
+for k in k_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X_scaled)
+    inertias.append(kmeans.inertia_)
+
+# Plot the elbow curve
+plt.figure(figsize=(8, 5))
+plt.plot(k_range, inertias, 'bo-', linewidth=2, markersize=8)
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Inertia (Within-cluster sum of squares)')
+plt.title('Elbow Method - Finding Optimal k')
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Use k=3 based on elbow method
+optimal_k = 3
+print(f"\nUsing k = {optimal_k} clusters")
+
+# Apply K-Means
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+kmeans_labels = kmeans.fit_predict(X_scaled)
+
+# Evaluate
+kmeans_silhouette = silhouette_score(X_scaled, kmeans_labels)
+
+print(f"\nK-Means Results:")
+print(f"Silhouette Score: {kmeans_silhouette:.4f}")
+print(f"Cluster sizes: {np.bincount(kmeans_labels)}")
+
+
+# In[4]:
+
+
+# 2. K-MEDOIDS CLUSTERING
+print("=" * 50)
+print("2. K-MEDOIDS CLUSTERING")
+print("=" * 50)
+
+# Apply K-Medoids (similar to K-Means but uses medoids instead of centroids)
+kmedoids = KMedoids(n_clusters=optimal_k, random_state=42, method='pam')
+kmedoids_labels = kmedoids.fit_predict(X_scaled)
+
+# Evaluate
+kmedoids_silhouette = silhouette_score(X_scaled, kmedoids_labels)
+
+print(f"\nK-Medoids Results:")
+print(f"Silhouette Score: {kmedoids_silhouette:.4f}")
+print(f"Cluster sizes: {np.bincount(kmedoids_labels)}")
+print(f"\nMedoid indices (cluster centers): {kmedoids.medoid_indices_}")
+
+
+# In[5]:
+
+
+# 3. DBSCAN CLUSTERING
+print("=" * 50)
+print("3. DBSCAN CLUSTERING")
+print("=" * 50)
+
+# DBSCAN finds clusters based on density
+# eps = maximum distance between two points to be in same neighborhood
+# min_samples = minimum points needed to form a dense region
+
+# Try different eps values to find a good one
+eps_values = [0.5, 0.7, 0.9, 1.1, 1.3]
+
+print("Testing different eps values:")
+for eps in eps_values:
+    dbscan_test = DBSCAN(eps=eps, min_samples=5)
+    labels_test = dbscan_test.fit_predict(X_scaled)
+    n_clusters = len(set(labels_test)) - (1 if -1 in labels_test else 0)
+    n_noise = list(labels_test).count(-1)
+    print(f"eps={eps}: {n_clusters} clusters, {n_noise} noise points")
+
+# Use eps=0.9 as it gives good balance
+dbscan = DBSCAN(eps=0.9, min_samples=5)
+dbscan_labels = dbscan.fit_predict(X_scaled)
+
+# Count clusters and noise
+n_clusters_dbscan = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
+n_noise = list(dbscan_labels).count(-1)
+
+print(f"\nDBSCAN Results (eps=0.9, min_samples=5):")
+print(f"Number of clusters: {n_clusters_dbscan}")
+print(f"Number of noise points: {n_noise}")
+
+# Calculate silhouette only if we have more than 1 cluster
+if n_clusters_dbscan > 1:
+    # Remove noise points for silhouette calculation
+    mask = dbscan_labels != -1
+    dbscan_silhouette = silhouette_score(X_scaled[mask], dbscan_labels[mask])
+    print(f"Silhouette Score: {dbscan_silhouette:.4f}")
+else:
+    dbscan_silhouette = -1
+    print("Not enough clusters for silhouette score")
+
+
+# In[6]:
+
+
+# 4. SPECTRAL CLUSTERING
+print("=" * 50)
+print("4. SPECTRAL CLUSTERING")
+print("=" * 50)
+
+# Spectral clustering uses graph theory to find clusters
+# Good for non-linear cluster shapes
+
+# Apply Spectral Clustering with RBF affinity
+spectral = SpectralClustering(n_clusters=optimal_k, affinity='rbf', random_state=42)
+spectral_labels = spectral.fit_predict(X_scaled)
+
+# Evaluate
+spectral_silhouette = silhouette_score(X_scaled, spectral_labels)
+
+print(f"\nSpectral Clustering Results:")
+print(f"Silhouette Score: {spectral_silhouette:.4f}")
+print(f"Cluster sizes: {np.bincount(spectral_labels)}")
+
+
+# In[7]:
+
+
+# 5. COMPARISON OF ALL CLUSTERING METHODS
+print("=" * 50)
+print("5. COMPARISON TABLE")
+print("=" * 50)
+
+# Create comparison table
+comparison_df = pd.DataFrame({
+    'Algorithm': ['K-Means', 'K-Medoids', 'DBSCAN', 'Spectral'],
+    'Silhouette Score': [
+        kmeans_silhouette, 
+        kmedoids_silhouette, 
+        dbscan_silhouette, 
+        spectral_silhouette
+    ],
+    'Number of Clusters': [
+        optimal_k, 
+        optimal_k, 
+        n_clusters_dbscan, 
+        optimal_k
+    ]
+})
+
+print("\nClustering Algorithm Comparison:")
+print(comparison_df.to_string(index=False))
+
+# Find best algorithm
+best_algo = comparison_df.loc[comparison_df['Silhouette Score'].idxmax(), 'Algorithm']
+best_score = comparison_df['Silhouette Score'].max()
+print(f"\nBest Algorithm: {best_algo} (Silhouette Score: {best_score:.4f})")
+
+
+# In[8]:
+
+
+# 6. VISUALIZE ALL CLUSTERING RESULTS
+print("=" * 50)
+print("6. VISUALIZATIONS")
+print("=" * 50)
+
+# We'll use PCA to reduce dimensions to 2D for visualization
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Create subplots for all methods
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
+
+# 1. K-Means
+axes[0, 0].scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans_labels, cmap='viridis', alpha=0.6)
+axes[0, 0].set_title(f'K-Means Clustering\nSilhouette: {kmeans_silhouette:.3f}')
+axes[0, 0].set_xlabel('Principal Component 1')
+axes[0, 0].set_ylabel('Principal Component 2')
+
+# 2. K-Medoids
+axes[0, 1].scatter(X_pca[:, 0], X_pca[:, 1], c=kmedoids_labels, cmap='viridis', alpha=0.6)
+axes[0, 1].set_title(f'K-Medoids Clustering\nSilhouette: {kmedoids_silhouette:.3f}')
+axes[0, 1].set_xlabel('Principal Component 1')
+axes[0, 1].set_ylabel('Principal Component 2')
+
+# 3. DBSCAN
+axes[1, 0].scatter(X_pca[:, 0], X_pca[:, 1], c=dbscan_labels, cmap='viridis', alpha=0.6)
+axes[1, 0].set_title(f'DBSCAN Clustering\nClusters: {n_clusters_dbscan}, Noise: {n_noise}')
+axes[1, 0].set_xlabel('Principal Component 1')
+axes[1, 0].set_ylabel('Principal Component 2')
+
+# 4. Spectral
+axes[1, 1].scatter(X_pca[:, 0], X_pca[:, 1], c=spectral_labels, cmap='viridis', alpha=0.6)
+axes[1, 1].set_title(f'Spectral Clustering\nSilhouette: {spectral_silhouette:.3f}')
+axes[1, 1].set_xlabel('Principal Component 1')
+axes[1, 1].set_ylabel('Principal Component 2')
+
+plt.tight_layout()
+plt.show()
+
+print("Visualization complete!")
+
+
+# In[9]:
+
+
+# 7. PERFORMANCE COMPARISON CHART
+print("=" * 50)
+print("7. PERFORMANCE COMPARISON")
+print("=" * 50)
+
+# Bar chart comparing silhouette scores
+algorithms = ['K-Means', 'K-Medoids', 'DBSCAN', 'Spectral']
+scores = [kmeans_silhouette, kmedoids_silhouette, dbscan_silhouette, spectral_silhouette]
+
+plt.figure(figsize=(10, 6))
+bars = plt.bar(algorithms, scores, color=['skyblue', 'lightcoral', 'lightgreen', 'gold'])
+plt.ylabel('Silhouette Score')
+plt.title('Clustering Algorithm Performance Comparison')
+plt.ylim(0, max(scores) + 0.1)
+
+# Add value labels on bars
+for bar, score in zip(bars, scores):
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height,
+             f'{score:.3f}',
+             ha='center', va='bottom', fontsize=12, fontweight='bold')
+
+plt.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+print("\nSummary:")
+print("• K-Means: Fast and simple, works well with spherical clusters")
+print("• K-Medoids: More robust to outliers than K-Means")
+print("• DBSCAN: Can find clusters of any shape and identifies outliers")
+print("• Spectral: Good for complex, non-linear cluster boundaries")
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# ### Objectives
+# Implementation of Linear and Logistic Regression
+# <br>
+# Comparing performance of both regression techniques
+
+# In[39]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score, mean_squared_error, r2_score
+from sklearn.linear_model import LinearRegression, LogisticRegression
+
+
+# In[40]:
+
+
+# Load dataset
+df = pd.read_csv("diabetes.csv")
+
+df.head()
+
+
+# In[41]:
+
+
+# Simple data preparation
+# Both Linear and Logistic Regression will predict diabetes outcome
+# Features: all columns except Outcome
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+
+# Split data (same split for both models for fair comparison)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale features for both models
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print(f"Training set: {X_train.shape}")
+print(f"Test set: {X_test.shape}")
+print(f"Target distribution - No Diabetes: {sum(y_train == 0)}, Diabetes: {sum(y_train == 1)}")
+print("Data prepared successfully!")
+
+
+# In[42]:
+
+
+# Linear and Logistic Regression Implementation
+print("LINEAR AND LOGISTIC REGRESSION - BOTH PREDICTING DIABETES OUTCOME")
+
+# 1. Linear Regression (all default parameters shown)
+# Treating diabetes prediction as a continuous problem
+linear_reg = LinearRegression(
+    fit_intercept=True,           # Whether to calculate the intercept (default)
+    copy_X=True,                  # If True, X will be copied (default)
+    n_jobs=None,                  # Number of jobs for computation (default)
+    positive=False                # When set to True, forces coefficients to be positive (default)
+)
+
+linear_reg.fit(X_train_scaled, y_train)
+linear_pred = linear_reg.predict(X_test_scaled)
+
+# Convert continuous predictions to binary for comparison (threshold = 0.5)
+linear_pred_binary = (linear_pred >= 0.5).astype(int)
+
+# Linear regression metrics
+mse_linear = mean_squared_error(y_test, linear_pred)
+r2_linear = r2_score(y_test, linear_pred)
+rmse_linear = np.sqrt(mse_linear)
+accuracy_linear = accuracy_score(y_test, linear_pred_binary)
+
+print(f"\n1. Linear Regression (Diabetes Prediction as Continuous):")
+print(f"   MSE: {mse_linear:.4f}")
+print(f"   RMSE: {rmse_linear:.4f}")
+print(f"   R² Score: {r2_linear:.4f}")
+print(f"   Accuracy (with 0.5 threshold): {accuracy_linear:.4f}")
+
+# 2. Logistic Regression (all default parameters shown)
+logistic_reg = LogisticRegression(
+    penalty='l2',                 # Regularization penalty (default)
+    dual=False,                   # Dual or primal formulation (default)
+    tol=1e-4,                     # Tolerance for stopping criteria (default)
+    C=1.0,                        # Inverse of regularization strength (default)
+    fit_intercept=True,           # Whether to include intercept (default)
+    intercept_scaling=1,          # Scaling between data features and synthetic intercept feature (default)
+    class_weight=None,            # Weights associated with classes (default)
+    random_state=42,              # Random seed for reproducibility
+    solver='lbfgs',               # Algorithm to use in optimization (default)
+    max_iter=100,                 # Maximum number of iterations (default)
+    multi_class='auto',           # Multi-class option (default)
+    verbose=0,                    # Verbosity level (default)
+    warm_start=False,             # Reuse solution of previous call (default)
+    n_jobs=None,                  # Number of CPU cores used (default)
+    l1_ratio=None                 # Elastic-Net mixing parameter (default)
+)
+
+logistic_reg.fit(X_train_scaled, y_train)
+logistic_pred = logistic_reg.predict(X_test_scaled)
+
+# Logistic regression metrics
+logistic_accuracy = accuracy_score(y_test, logistic_pred)
+
+print(f"\n2. Logistic Regression (Diabetes Classification):")
+print(f"   Accuracy: {logistic_accuracy:.4f}")
+
+
+# In[43]:
+
+
+# Performance Comparison
+print("\nPERFORMANCE COMPARISON")
+
+models_data = []
+
+# Linear Regression metrics (treating as regression problem)
+linear_precision = precision_score(y_test, linear_pred_binary)
+linear_recall = recall_score(y_test, linear_pred_binary)
+linear_f1 = f1_score(y_test, linear_pred_binary)
+
+models_data.append({
+    'Model': 'Linear Regression',
+    'Task': 'Diabetes (Continuous)',
+    'Accuracy': f'{accuracy_linear:.4f}',
+    'Precision': f'{linear_precision:.4f}',
+    'Recall': f'{linear_recall:.4f}',
+    'F1-Score': f'{linear_f1:.4f}',
+    'R²': f'{r2_linear:.4f}',
+    'RMSE': f'{rmse_linear:.4f}'
+})
+
+# Logistic Regression metrics (classification problem)
+logistic_precision = precision_score(y_test, logistic_pred)
+logistic_recall = recall_score(y_test, logistic_pred)
+logistic_f1 = f1_score(y_test, logistic_pred)
+
+models_data.append({
+    'Model': 'Logistic Regression',
+    'Task': 'Diabetes (Classification)',
+    'Accuracy': f'{logistic_accuracy:.4f}',
+    'Precision': f'{logistic_precision:.4f}',
+    'Recall': f'{logistic_recall:.4f}',
+    'F1-Score': f'{logistic_f1:.4f}',
+    'R²': 'N/A',
+    'RMSE': 'N/A'
+})
+
+# Create comparison DataFrame
+comparison_df = pd.DataFrame(models_data)
+
+print("\nModel Performance Summary:")
+print(comparison_df.to_string(index=False))
+
+print(f"\nBoth models predict diabetes outcome:")
+print(f"Linear Regression treats it as continuous (0-1 range)")
+print(f"Logistic Regression treats it as binary classification (0 or 1)")
+
+
+# In[44]:
+
+
+# Performance Visualization
+plt.figure(figsize=(15, 5))
+
+# Left subplot: Linear regression actual vs predicted (continuous)
+plt.subplot(1, 3, 1)
+plt.scatter(y_test, linear_pred, alpha=0.7, color='skyblue')
+plt.plot([0, 1], [0, 1], 'r--', lw=2)
+plt.xlabel('Actual Diabetes Outcome')
+plt.ylabel('Predicted Diabetes (Continuous)')
+plt.title(f'Linear Regression: Actual vs Predicted\nR² = {r2_linear:.3f}')
+plt.grid(True, alpha=0.3)
+
+# Middle subplot: Logistic regression actual vs predicted (binary)
+plt.subplot(1, 3, 2)
+# Add some jitter to see overlapping points better
+jitter = 0.05
+y_test_jitter = y_test + np.random.normal(0, jitter, size=len(y_test))
+y_pred_jitter = logistic_pred + np.random.normal(0, jitter, size=len(logistic_pred))
+
+plt.scatter(y_test_jitter, y_pred_jitter, alpha=0.7, color='lightcoral')
+plt.plot([0, 1], [0, 1], 'r--', lw=2)
+plt.xlabel('Actual Diabetes Outcome')
+plt.ylabel('Predicted Diabetes (Binary)')
+plt.title(f'Logistic Regression: Actual vs Predicted\nAccuracy = {logistic_accuracy:.3f}')
+plt.grid(True, alpha=0.3)
+plt.xticks([0, 1], ['No Diabetes', 'Diabetes'])
+plt.yticks([0, 1], ['No Diabetes', 'Diabetes'])
+
+plt.tight_layout()
+plt.show()
+
+
+# In[45]:
+
+
+# Linear vs Logistic Regression Comparison
+# Both models now predict the same target (diabetes outcome)
+plt.figure(figsize=(12, 8))
+
+# Prepare comparison data for same target prediction
+models_comparison = pd.DataFrame({
+    'Model': ['Linear Regression', 'Logistic Regression'],
+    'Accuracy': [accuracy_linear, logistic_accuracy],
+    'Precision': [linear_precision, logistic_precision], 
+    'Recall': [linear_recall, logistic_recall],
+    'F1-Score': [linear_f1, logistic_f1]
+})
+
+models = models_comparison['Model']
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+colors = ['skyblue', 'lightcoral']
+
+x = np.arange(len(metrics))
+width = 0.35
+
+for i, model in enumerate(models):
+    values = [models_comparison.iloc[i][metric] for metric in metrics]
+    plt.bar(x + i*width, values, width, label=model, color=colors[i], alpha=0.8)
+    for j, v in enumerate(values):
+        plt.text(x[j] + i*width, v + 0.01, f'{v:.3f}', ha='center', va='bottom', fontsize=10)
+
+plt.xlabel('Performance Metrics')
+plt.ylabel('Score')
+plt.title('Linear Regression vs Logistic Regression Performance Comparison\n(Both predicting diabetes outcome)')
+plt.xticks(x + width/2, metrics)
+plt.legend()
+plt.ylim(0, 1.1)
+plt.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# Add explanatory note
+print("Comparison Summary:")
+print(f"Linear Regression (continuous approach): Accuracy = {accuracy_linear:.3f}")
+print(f"Logistic Regression (classification approach): Accuracy = {logistic_accuracy:.3f}")
+print("\nBoth models predict diabetes outcome but approach it differently:")
+print("- Linear Regression: Treats as continuous problem, then applies threshold")
+print("- Logistic Regression: Designed specifically for binary classification")
+
+
+# ## Inference
+# 
+# After implementing Linear and Logistic Regression on the diabetes dataset:
+# 
+# - **Linear Regression** achieved R² = 0.265 for BMI prediction, showing moderate performance in predicting continuous values.
+# - **Logistic Regression** achieved 75.3% accuracy for diabetes classification, demonstrating good performance for binary classification tasks.
+# 
+# Linear regression is suitable for predicting continuous outcomes, while logistic regression excels at binary classification problems.
